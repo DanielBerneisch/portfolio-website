@@ -1,11 +1,42 @@
 import { Mail, Linkedin } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+
+type FormData = {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+};
 
 export default function Contact({
   sectionRefs,
 }: {
   sectionRefs: Record<string, React.RefObject<HTMLElement | null>>;
 }) {
+  const [loading, setLoading] = useState(false);
+  const { register, handleSubmit, reset } = useForm<FormData>();
+
+  const onSubmit = async (data: FormData) => {
+    setLoading(true);
+
+    const res = await fetch("/api/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    setLoading(false);
+
+    if (res.ok) {
+      alert("Message sent!");
+      reset();
+    } else {
+      alert("Failed to send message.");
+    }
+  };
+
   return (
     <section
       id="contact"
@@ -79,6 +110,7 @@ export default function Contact({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false, amount: 0.2 }}
             transition={{ duration: 0.5 }}
+            onSubmit={handleSubmit(onSubmit)}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -91,6 +123,7 @@ export default function Contact({
                 <input
                   type="text"
                   id="name"
+                  {...register("name", { required: true })}
                   className="w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Your name"
                 />
@@ -105,6 +138,7 @@ export default function Contact({
                 <input
                   type="email"
                   id="email"
+                  {...register("email", { required: true })}
                   className="w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="your.email@example.com"
                 />
@@ -120,6 +154,7 @@ export default function Contact({
               <input
                 type="text"
                 id="subject"
+                {...register("subject", { required: true })}
                 className="w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Subject"
               />
@@ -133,6 +168,7 @@ export default function Contact({
               </label>
               <textarea
                 id="message"
+                {...register("message", { required: true })}
                 rows={4}
                 className="w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Your message"
@@ -143,8 +179,9 @@ export default function Contact({
               className="w-full bg-blue-600 text-white font-medium py-3 px-8 rounded-full shadow-lg shadow-blue-500/20 cursor-pointer"
               transition={{ duration: 0.5 }}
               whileHover={{ scale: 1.02 }}
+              disabled={loading}
             >
-              Send Message
+              {loading ? "Sending..." : "Send Message"}
             </motion.button>
           </motion.form>
         </div>
