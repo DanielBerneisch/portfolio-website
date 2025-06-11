@@ -9,14 +9,13 @@ export async function POST(req: Request) {
     const { name, email, subject, message } = body;
 
     const { data, error } = await resend.emails.send({
-      from: "Contact Form <contact@danielberneisch.com>",
+      from: "New Inquiry <contact@danielberneisch.com>",
       to: ["da.berneisch@gmx.de"],
       subject: subject || "New Contact Form Submission",
       react: EmailTemplate({ name, email, message }) as React.ReactElement,
     });
 
     if (error) {
-      console.error("Error sending email:", error.message);
       return Response.json({ error }, { status: 500 });
     }
 

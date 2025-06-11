@@ -2,6 +2,7 @@ import { Mail, Linkedin } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 type FormData = {
   name: string;
@@ -16,6 +17,7 @@ export default function Contact({
   sectionRefs: Record<string, React.RefObject<HTMLElement | null>>;
 }) {
   const [loading, setLoading] = useState(false);
+  const [hideForm, setHideForm] = useState(false);
   const { register, handleSubmit, reset } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
@@ -30,10 +32,11 @@ export default function Contact({
     setLoading(false);
 
     if (res.ok) {
-      alert("Message sent!");
+      toast.success("Message sent successfully!");
+      setHideForm(true);
       reset();
     } else {
-      alert("Failed to send message.");
+      toast.error("Failed to send message. Please try again later.");
     }
   };
 
@@ -104,86 +107,100 @@ export default function Contact({
             </motion.a>
           </div>
 
-          <motion.form
-            className="space-y-6"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.2 }}
-            transition={{ duration: 0.5 }}
-            onSubmit={handleSubmit(onSubmit)}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {!hideForm ? (
+            <motion.form
+              className="space-y-6"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.2 }}
+              transition={{ duration: 0.5 }}
+              onSubmit={handleSubmit(onSubmit)}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-300 mb-2"
+                  >
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    {...register("name", { required: true })}
+                    className="w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-300 mb-2"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    {...register("email", { required: true })}
+                    className="w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="your.email@example.com"
+                  />
+                </div>
+              </div>
               <div>
                 <label
-                  htmlFor="name"
+                  htmlFor="subject"
                   className="block text-sm font-medium text-gray-300 mb-2"
                 >
-                  Name
+                  Subject
                 </label>
                 <input
                   type="text"
-                  id="name"
-                  {...register("name", { required: true })}
+                  id="subject"
+                  {...register("subject", { required: true })}
                   className="w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Your name"
+                  placeholder="Subject"
                 />
               </div>
               <div>
                 <label
-                  htmlFor="email"
+                  htmlFor="message"
                   className="block text-sm font-medium text-gray-300 mb-2"
                 >
-                  Email
+                  Message
                 </label>
-                <input
-                  type="email"
-                  id="email"
-                  {...register("email", { required: true })}
+                <textarea
+                  id="message"
+                  {...register("message", { required: true })}
+                  rows={4}
                   className="w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="your.email@example.com"
-                />
+                  placeholder="Your message"
+                ></textarea>
               </div>
-            </div>
-            <div>
-              <label
-                htmlFor="subject"
-                className="block text-sm font-medium text-gray-300 mb-2"
+              <motion.button
+                type="submit"
+                className="w-full bg-blue-600 text-white font-medium py-3 px-8 rounded-full shadow-lg shadow-blue-500/20 cursor-pointer"
+                transition={{ duration: 0.5 }}
+                whileHover={{ scale: 1.02 }}
+                disabled={loading}
               >
-                Subject
-              </label>
-              <input
-                type="text"
-                id="subject"
-                {...register("subject", { required: true })}
-                className="w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Subject"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="message"
-                className="block text-sm font-medium text-gray-300 mb-2"
-              >
-                Message
-              </label>
-              <textarea
-                id="message"
-                {...register("message", { required: true })}
-                rows={4}
-                className="w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Your message"
-              ></textarea>
-            </div>
-            <motion.button
-              type="submit"
-              className="w-full bg-blue-600 text-white font-medium py-3 px-8 rounded-full shadow-lg shadow-blue-500/20 cursor-pointer"
+                {loading ? "Sending..." : "Send Message"}
+              </motion.button>
+            </motion.form>
+          ) : (
+            <motion.div
+              className="text-center text-gray-400"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.2 }}
               transition={{ duration: 0.5 }}
-              whileHover={{ scale: 1.02 }}
-              disabled={loading}
             >
-              {loading ? "Sending..." : "Send Message"}
-            </motion.button>
-          </motion.form>
+              <p className="text-lg">
+                Thank you for reaching out! I will get back to you soon.
+              </p>
+            </motion.div>
+          )}
         </div>
       </div>
     </section>
