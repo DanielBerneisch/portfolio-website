@@ -92,7 +92,12 @@ export default function ParticleSystem({ count = 2000, radius = 7 }) {
 
   useFrame(() => {
     const particles = particlesRef.current;
-    if (!particles || !particles.geometry) return;
+    if (
+      !particles ||
+      !particles.geometry ||
+      !particles.geometry.attributes.position
+    )
+      return;
 
     const positions = particles.geometry.attributes.position
       .array as Float32Array;
