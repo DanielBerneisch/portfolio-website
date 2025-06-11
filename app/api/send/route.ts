@@ -8,16 +8,15 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, email, subject, message } = body;
 
-    console.log(body);
-
     const { data, error } = await resend.emails.send({
-      from: "Portfolio <onboarding@resend.dev>",
+      from: "Portfolio <da.berneisch@gmx.de>",
       to: ["da.berneisch@gmx.de"],
       subject: subject || "New Contact Form Submission",
       react: EmailTemplate({ name, email, message }) as React.ReactElement,
     });
 
     if (error) {
+      console.error("Error sending email:", error.message);
       return Response.json({ error }, { status: 500 });
     }
 
